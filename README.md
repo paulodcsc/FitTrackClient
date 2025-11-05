@@ -116,25 +116,50 @@ FitTrack/
    ```bash
    docker-compose up --build
    ```
+   
+   Or use the npm script:
+   ```bash
+   npm run docker:build && npm run docker:up
+   ```
 
 2. **Run in detached mode (background):**
    ```bash
    docker-compose up -d --build
+   ```
+   
+   Or use the npm script:
+   ```bash
+   npm run docker:up
    ```
 
 3. **View logs:**
    ```bash
    docker-compose logs -f
    ```
+   
+   Or use the npm script:
+   ```bash
+   npm run docker:logs
+   ```
 
 4. **Stop containers:**
    ```bash
    docker-compose down
    ```
+   
+   Or use the npm script:
+   ```bash
+   npm run docker:down
+   ```
+
+5. **Restart containers:**
+   ```bash
+   npm run docker:restart
+   ```
 
 ### Access the Application
 
-- **Frontend**: http://localhost:80
+- **Frontend**: http://localhost:8080
 - **Backend API**: http://localhost:3001
 - **Health Check**: http://localhost:3001/health
 
@@ -150,7 +175,8 @@ The application consists of two containers:
 
 2. **Frontend Container** (`fittrack-frontend`)
    - Nginx web server serving React app
-   - Port: 80
+   - Internal Port: 80
+   - External Port: 8080 (mapped in docker-compose)
    - Proxies API requests to backend
    - SPA routing configured
 
@@ -159,16 +185,34 @@ The application consists of two containers:
 **Build images:**
 ```bash
 docker-compose build
+# Or use npm script:
+npm run docker:build
 ```
 
 **Start services:**
 ```bash
 docker-compose start
+# Or use npm script:
+npm run docker:up
 ```
 
 **Stop services:**
 ```bash
 docker-compose stop
+# Or use npm script:
+npm run docker:down
+```
+
+**View logs:**
+```bash
+docker-compose logs -f
+# Or use npm script:
+npm run docker:logs
+```
+
+**Restart services:**
+```bash
+npm run docker:restart
 ```
 
 **Remove containers and volumes:**
@@ -186,6 +230,16 @@ docker-compose ps
 docker-compose build backend
 docker-compose build frontend
 ```
+
+### Available NPM Docker Scripts
+
+The project includes convenient npm scripts for Docker operations:
+
+- `npm run docker:build` - Build Docker images
+- `npm run docker:up` - Start containers in detached mode
+- `npm run docker:down` - Stop and remove containers
+- `npm run docker:logs` - View container logs (follow mode)
+- `npm run docker:restart` - Restart all containers
 
 ### Production Deployment
 
