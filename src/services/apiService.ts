@@ -107,9 +107,14 @@ class APIService {
 
     const model = this.config.model || 'gpt-4-turbo-preview';
     
+    // Always use backend API proxy (handles CORS and keeps keys secure)
+    const apiUrl = import.meta.env.VITE_API_URL 
+      ? `${import.meta.env.VITE_API_URL}/api/openai/v1/chat/completions`
+      : '/api/openai/v1/chat/completions';
+    
     try {
       const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
+        apiUrl,
         {
           model: model,
           messages: [
@@ -146,9 +151,14 @@ class APIService {
 
     const model = this.config.model || 'claude-3-5-sonnet-20241022';
     
+    // Always use backend API proxy (handles CORS and keeps keys secure)
+    const apiUrl = import.meta.env.VITE_API_URL 
+      ? `${import.meta.env.VITE_API_URL}/api/anthropic/v1/messages`
+      : '/api/anthropic/v1/messages';
+    
     try {
       const response = await axios.post(
-        'https://api.anthropic.com/v1/messages',
+        apiUrl,
         {
           model: model,
           max_tokens: 4096,
@@ -171,7 +181,8 @@ class APIService {
 
       return response.data.content[0].text;
     } catch (error: any) {
-      throw new Error(`Claude API error: ${error.response?.data?.error?.message || error.message}`);
+      const errorMessage = error.response?.data?.error?.message || error.message;
+      throw new Error(`Claude API error: ${errorMessage}`);
     }
   }
 

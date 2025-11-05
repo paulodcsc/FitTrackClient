@@ -16,6 +16,7 @@ node_modules
 dist
 dist-ssr
 build
+server/dist
 *.local
 
 # Environment variables

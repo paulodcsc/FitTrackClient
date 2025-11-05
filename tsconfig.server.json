@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./server/dist",
+    "rootDir": "./server",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "noEmit": false
+  },
+  "include": ["server/**/*"],
+  "exclude": ["node_modules", "dist", "server/dist"]
+}
+

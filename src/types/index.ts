@@ -22,3 +22,4 @@ export interface CVAnalysis {
   atsCheck: ATSFormatCheck;
   adaptation?: CVAdaptationResult;
 }
+

@@ -1,138 +1,217 @@
-# CV/Resume ATS Optimizer
+# FitTrack - CV/Resume ATS Optimizer
 
-A modern web application that helps you optimize your CV/resume for Applicant Tracking Systems (ATS) and adapt it to specific job descriptions. Built with React, TypeScript, and Vite.
+A React + TypeScript application for optimizing CVs/resumes for Applicant Tracking Systems (ATS) with AI-powered analysis and adaptation.
 
 ## Features
 
-1. **ATS Format Checking**: Upload your CV and get an instant analysis of its ATS compatibility
-   - ATS compatibility score (0-100)
-   - Identified issues and formatting problems
-   - Actionable suggestions for improvement
+- **ATS Format Checking**: Analyze your CV/resume for ATS compatibility
+- **CV Adaptation**: Adapt your CV to match specific job descriptions
+- **LaTeX Generation**: Generate LaTeX code for professional CV formatting
+- **Multi-Provider Support**: Works with OpenAI and Anthropic (Claude) APIs
+- **Secure Backend**: API keys are handled securely through a backend proxy
 
-2. **CV Adaptation**: Compare your CV with a job description and get an optimized version
-   - Highlights relevant skills and experiences
-   - Reorders sections to emphasize qualifications
-   - Adds relevant keywords naturally
-   - Maintains ATS-friendly format
+## Tech Stack
 
-3. **LaTeX Generation**: Get professionally formatted LaTeX code for your adapted CV
-   - Complete LaTeX document ready to compile
-   - Preview the LaTeX code
-   - Download the .tex file
+- **Frontend**: React 19, TypeScript, Vite
+- **Backend**: Express.js, Node.js
+- **APIs**: OpenAI, Anthropic Claude
 
-4. **Multi-Provider Support**: Works with both OpenAI and Claude (Anthropic) APIs
-   - Easy switching between providers
-   - Configurable model selection
+## Setup
 
-## Getting Started
+### 1. Install Dependencies
 
-### Prerequisites
-
-- Node.js 18+ and npm
-- An API key from either:
-  - [OpenAI](https://platform.openai.com/api-keys) (for GPT models)
-  - [Anthropic](https://console.anthropic.com/) (for Claude models)
-
-### Installation
-
-1. Clone the repository and navigate to the project directory:
-```bash
-cd FitTrack
-```
-
-2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Start the development server:
+### 2. Configure Environment Variables
+
+Create a `.env` file in the root directory (optional for development):
+
+```env
+PORT=3001
+FRONTEND_URL=http://localhost:5173
+```
+
+### 3. Development
+
+#### Option A: Run Both Frontend and Backend Together
+
+```bash
+npm run dev:all
+```
+
+This will start:
+- Backend API server on `http://localhost:3001`
+- Frontend dev server on `http://localhost:5173`
+
+#### Option B: Run Separately
+
+**Terminal 1 - Backend:**
+```bash
+npm run dev:server
+```
+
+**Terminal 2 - Frontend:**
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+### 4. Production Build
 
-## Usage
-
-1. **Configure API**: Click the "Configure API" button in the top right and enter your API key
-   - Select your provider (OpenAI or Claude)
-   - Optionally specify a model (defaults are provided)
-   - Save the configuration
-
-2. **Upload CV**: 
-   - Upload a text file containing your CV/resume, or
-   - Paste your CV content directly into the text area
-
-3. **Check ATS Format**: 
-   - Click "Check ATS Format" to analyze your CV
-   - Review the score, issues, and suggestions
-   - Continue to adaptation when ready
-
-4. **Adapt to Job Description**:
-   - Paste the job description in the text area
-   - Click "Adapt CV" to generate an optimized version
-   - Wait for the AI to process and generate results
-
-5. **Download Results**:
-   - Review the generated LaTeX code
-   - Check the highlighted skills and changes
-   - Download the LaTeX file using the "Download LaTeX" button
-   - Note: PDF compilation requires a LaTeX compiler (like Overleaf or local LaTeX installation)
-
-## API Configuration
-
-### OpenAI
-- **Default Model**: `gpt-4-turbo-preview`
-- **API Endpoint**: `https://api.openai.com/v1/chat/completions`
-- **Get API Key**: [OpenAI Platform](https://platform.openai.com/api-keys)
-
-### Claude (Anthropic)
-- **Default Model**: `claude-3-5-sonnet-20241022`
-- **API Endpoint**: `https://api.anthropic.com/v1/messages`
-- **Get API Key**: [Anthropic Console](https://console.anthropic.com/)
-
-## Project Structure
-
-```
-src/
-├── App.tsx              # Main application component
-├── App.css              # Application styles
-├── services/
-│   └── apiService.ts    # API abstraction layer for OpenAI/Claude
-├── types/
-│   └── index.ts         # TypeScript type definitions
-└── main.tsx             # Application entry point
-```
-
-## Technologies Used
-
-- **React 19**: UI framework
-- **TypeScript**: Type safety
-- **Vite**: Build tool and dev server
-- **Axios**: HTTP client for API calls
-- **Modern CSS**: Gradient designs and responsive layout
-
-## Building for Production
-
+Build the frontend:
 ```bash
 npm run build
 ```
 
-The production build will be in the `dist/` directory.
+Build the backend:
+```bash
+npm run build:server
+```
 
-## Future Enhancements
+Start the backend server:
+```bash
+npm run start:server
+```
 
-- [ ] PDF compilation backend integration
-- [ ] Support for more file formats (PDF, DOCX)
-- [ ] CV templates library
-- [ ] Save and load CV drafts
-- [ ] Batch job description processing
-- [ ] Advanced ATS optimization suggestions
+For production, make sure to set the `VITE_API_URL` environment variable in your frontend build to point to your backend API URL.
+
+## Usage
+
+1. **Configure API**: Click the "⚙️ Configure API" button and enter your API key
+2. **Upload CV**: Upload your CV/resume as a text file or paste the content
+3. **Check ATS Format**: Get your CV analyzed for ATS compatibility
+4. **Adapt CV**: Provide a job description to adapt your CV accordingly
+5. **Download**: Download the LaTeX code or PDF (if available)
+
+## Security Notes
+
+- API keys are sent from the frontend to the backend proxy
+- The backend securely forwards requests to the actual API providers
+- Never commit `.env` files or expose API keys in client-side code
+- For production, consider implementing server-side API key storage
+
+## Project Structure
+
+```
+FitTrack/
+├── server/          # Backend API server
+│   └── index.ts     # Express server with API proxy
+├── src/             # Frontend React application
+│   ├── services/    # API service layer
+│   └── App.tsx      # Main application component
+└── vite.config.ts   # Vite configuration with proxy
+```
+
+## Docker Deployment
+
+### Prerequisites
+
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+### Quick Start with Docker
+
+1. **Build and run both containers:**
+   ```bash
+   docker-compose up --build
+   ```
+
+2. **Run in detached mode (background):**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+3. **View logs:**
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. **Stop containers:**
+   ```bash
+   docker-compose down
+   ```
+
+### Access the Application
+
+- **Frontend**: http://localhost:80
+- **Backend API**: http://localhost:3001
+- **Health Check**: http://localhost:3001/health
+
+### Docker Services
+
+The application consists of two containers:
+
+1. **Backend Container** (`fittrack-backend`)
+   - Express.js API server
+   - Port: 3001
+   - Handles API proxy requests
+   - Health check endpoint available
+
+2. **Frontend Container** (`fittrack-frontend`)
+   - Nginx web server serving React app
+   - Port: 80
+   - Proxies API requests to backend
+   - SPA routing configured
+
+### Docker Commands
+
+**Build images:**
+```bash
+docker-compose build
+```
+
+**Start services:**
+```bash
+docker-compose start
+```
+
+**Stop services:**
+```bash
+docker-compose stop
+```
+
+**Remove containers and volumes:**
+```bash
+docker-compose down -v
+```
+
+**View service status:**
+```bash
+docker-compose ps
+```
+
+**Rebuild specific service:**
+```bash
+docker-compose build backend
+docker-compose build frontend
+```
+
+### Production Deployment
+
+For production, you may want to:
+
+1. **Use environment-specific docker-compose file:**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+2. **Set environment variables:**
+   - Update `FRONTEND_URL` in docker-compose.yml
+   - Configure proper domain names
+   - Set up SSL/TLS certificates (consider using a reverse proxy like Traefik)
+
+3. **Use Docker secrets** for sensitive data (API keys, etc.)
+
+4. **Configure resource limits** in docker-compose.yml:
+   ```yaml
+   deploy:
+     resources:
+       limits:
+         cpus: '1'
+         memory: 512M
+   ```
 
 ## License
 
-This project is open source and available for personal and commercial use.
-
-## Support
-
-For issues or questions, please open an issue on the repository.# FitTrackClient
+MIT
