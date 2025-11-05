@@ -29,9 +29,24 @@ npm install
 Create a `.env` file in the root directory (optional for development):
 
 ```env
+# Backend Configuration
 PORT=3001
+HOSTNAME=0.0.0.0
+NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+
+# Frontend Configuration (for build)
+VITE_API_URL=http://localhost:3001
 ```
+
+**Backend Variables:**
+- `PORT` - Backend server port (default: 3001)
+- `HOSTNAME` - Host to bind to (default: 0.0.0.0)
+- `NODE_ENV` - Environment mode (development/production)
+- `FRONTEND_URL` - Frontend URL for CORS (default: http://localhost:5173)
+
+**Frontend Variables:**
+- `VITE_API_URL` - Backend API URL (used during build, default: http://localhost:3001)
 
 ### 3. Development
 
@@ -96,12 +111,117 @@ For production, make sure to set the `VITE_API_URL` environment variable in your
 ```
 FitTrack/
 ├── server/          # Backend API server
-│   └── index.ts     # Express server with API proxy
+│   ├── index.ts     # Express server with API proxy
+│   └── Dockerfile   # Backend container configuration
 ├── src/             # Frontend React application
 │   ├── services/    # API service layer
 │   └── App.tsx      # Main application component
 └── vite.config.ts   # Vite configuration with proxy
 ```
+
+## Backend API
+
+The backend is an Express.js server that acts as a secure proxy for OpenAI and Anthropic API requests. It handles API key authentication and forwards requests to the respective providers.
+
+### API Endpoints
+
+#### Health Check
+- **GET** `/health`
+  - Returns server status and timestamp
+  - Response: `{ status: 'ok', timestamp: 'ISO8601' }`
+
+#### Anthropic (Claude) API Proxy
+- **POST** `/api/anthropic/v1/messages`
+  - Proxies requests to Anthropic Claude API
+  - **Headers:**
+    - `x-api-key`: Your Anthropic API key (required)
+    - `anthropic-version`: API version (defaults to '2023-06-01')
+  - **Body:** Standard Anthropic messages API request format
+  - Returns the response from Anthropic API
+
+#### OpenAI API Proxy
+- **POST** `/api/openai/v1/chat/completions`
+  - Proxies requests to OpenAI API
+  - **Headers:**
+    - `Authorization`: Bearer token with your OpenAI API key (required)
+    - Format: `Bearer <your-api-key>`
+  - **Body:** Standard OpenAI chat completions API request format
+  - Returns the response from OpenAI API
+
+### Backend Configuration
+
+#### Environment Variables
+
+Create a `.env` file in the root directory (optional for development):
+
+```env
+# Server Configuration
+PORT=3001
+HOSTNAME=0.0.0.0
+NODE_ENV=development
+
+# Frontend URL (for CORS)
+FRONTEND_URL=http://localhost:5173
+```
+
+**Environment Variables:**
+- `PORT` (default: 3001) - Port the backend server listens on
+- `HOSTNAME` (default: 0.0.0.0) - Host address to bind to
+- `NODE_ENV` - Environment mode (development/production)
+- `FRONTEND_URL` - Frontend URL for CORS configuration
+
+#### CORS Configuration
+
+The backend automatically allows requests from:
+- The configured `FRONTEND_URL`
+- `http://localhost:5173` (development)
+- `http://localhost:80` (Docker frontend)
+- `http://frontend:80` (Docker internal network)
+- `http://localhost:3000` (alternative dev port)
+- All origins in development mode (`NODE_ENV=development`)
+
+### Backend Development
+
+#### Running the Backend
+
+**Development mode (with hot reload):**
+```bash
+npm run dev:server
+```
+
+**Production build:**
+```bash
+# Build TypeScript
+npm run build:server
+
+# Run the server
+npm run start:server
+```
+
+#### Backend Structure
+
+- **`server/index.ts`** - Main Express server file
+  - Sets up CORS middleware
+  - Configures API proxy endpoints
+  - Handles health checks
+  - Manages request forwarding to OpenAI/Anthropic
+
+### Backend Docker Setup
+
+The backend uses a separate Dockerfile at `server/Dockerfile`:
+
+**Build Process:**
+1. Multi-stage build using Node.js 20 Alpine
+2. Installs dependencies with `npm ci`
+3. Compiles TypeScript to JavaScript
+4. Runs as non-root user (nodejs) for security
+5. Exposes port 3001
+
+**Key Features:**
+- Production-optimized image
+- Non-root user execution
+- Minimal Alpine-based image size
+- Separate build and runtime stages
 
 ## Docker Deployment
 
@@ -168,17 +288,38 @@ FitTrack/
 The application consists of two containers:
 
 1. **Backend Container** (`fittrack-backend`)
-   - Express.js API server
-   - Port: 3001
-   - Handles API proxy requests
-   - Health check endpoint available
+   - **Technology:** Express.js API server (Node.js 20)
+   - **Port:** 3001 (exposed to host)
+   - **Dockerfile:** `server/Dockerfile`
+   - **Build Context:** Root directory (uses `server/` subdirectory)
+   - **Features:**
+     - Handles API proxy requests to OpenAI and Anthropic
+     - Health check endpoint at `/health`
+     - CORS configured for frontend communication
+     - Runs as non-root user (nodejs) for security
+     - Health check configured in docker-compose (waits for service to be ready)
+   - **Environment Variables:**
+     - `NODE_ENV=production`
+     - `PORT=3001`
+     - `HOSTNAME=0.0.0.0`
+     - `FRONTEND_URL=http://localhost:80`
+   - **Dependencies:** Frontend waits for backend health check before starting
 
 2. **Frontend Container** (`fittrack-frontend`)
-   - Nginx web server serving React app
-   - Internal Port: 80
-   - External Port: 8080 (mapped in docker-compose)
-   - Proxies API requests to backend
-   - SPA routing configured
+   - **Technology:** Nginx web server serving React app
+   - **Internal Port:** 80
+   - **External Port:** 8080 (mapped in docker-compose)
+   - **Dockerfile:** Root `Dockerfile`
+   - **Features:**
+     - Serves built React application
+     - Proxies API requests to backend container
+     - SPA routing configured (all routes serve index.html)
+     - Gzip compression enabled
+     - Security headers configured
+     - Static asset caching
+   - **Build Args:**
+     - `VITE_API_URL=http://localhost:3001` (API URL for frontend)
+   - **Dependencies:** Waits for backend to be healthy before starting
 
 ### Docker Commands
 
